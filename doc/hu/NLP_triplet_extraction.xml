@@ -1,0 +1,154 @@
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude" version="5.1" xml:lang="hu">
+  <info>
+  <title>Triplet Bányászat a Samu projectben</title>
+    <author>
+      <personname>
+        <firstname>Ádám</firstname>
+        <surname>Bertalan</surname>
+      </personname>
+    </author>
+  </info>
+
+  <chapter>
+    <info>
+      <title>Bevezetés</title>
+    </info>
+    <section>
+      <title>Bevezetés</title>
+      <para>Ebben a rövid leírásban ismertetem a Prog2 tárgy 3. védésére választott feladatom megoldási menetét.</para>
+    </section>
+    <section>
+      <title>Mi az a triplet?</title>
+      <para>Kezdjük is az elején, mi is az a triplet? Ha vesszük a következő Angol nyelvű mondatot:</para>
+        <para>A rare black squirrel has become a regular visitor to a suburban garden.</para>
+        <para>
+          Mondatelemzés szempontjából ennek a mondatnak az állítmánya: become, alanya: squirrel és tárgya: visitor.
+              Ekkor az erre a mondatra vonatkozó triplet (alany-állítmáy-tárgy hármas):
+              squirrel become visitor
+        </para>
+    </section>
+    <section>
+      <title>A feladat</title>
+      <para>A feladat az, hogy egy mondatból a lehető legtöbb ilyen tripletet tudjuk kibányászni. Természetesen ha a mondatból hiányzik a hármasból valamelyik tag akkor az a mondat nem tartalmaz tripletet, illetve egy érdekes megoldási része a feladatnak a rejtett alany kérdése amely az én megoldásomnak (egyelőre) nem része.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <info>
+      <title>Lássunk hozzá</title>
+    </info>
+    <section>
+      <title>Egy példa</title>
+      <para>Most már tudjuk hogy mi az a triplet, következő lépés hogy hogyan bányásszuk ki?</para>
+      <para>A feladat megoldásához a link-grammar nevezetű könyvtárat használtam fel ami nagyon nagy segítséget nyújt a mondatok megfelelő átalakításához amely után egyszerűbb a triplet bányászat. A link-grammar dokumentációja és egyéb hasznos dolgok elérhetők a következő linken: <link xlink:href="http://www.link.cs.cmu.edu/link/">http://www.link.cs.cmu.edu/link/</link></para>
+      <para>A link-grammar könyvtár által nyújtott egyik legfontosabb lehetőség az, hogy a megkeresi a mondatban a szavak közti kapcsolatot, és ezeket a kapcsolatokat címkékkel látja el. Ezen címkék alapján már egyszerűbb a feladat, kell egy algoritmus ami megkeresi a megfelelő címkék alapján a triplet tagjait. Nézzünk egy egyszerű példát a szavak közti kapcsolatokra:</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="example_diagram.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Példa diagramra</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>A “fordítás” után ilyen szerkezetű mondatot kapunk. Ennek a mondatnak az egyetlen triplete a car.is(mine) így hát nézzük meg hogy mit jelentenek a címkék. A következő linken megtalálható az összes címke jelentése: <link xlink:href="http://www.link.cs.cmu.edu/link/dict/index.html">http://www.link.cs.cmu.edu/link/dict/index.html</link> </para>
+      <para>A számunkra fontos címkék jelenleg az Ss és a O*t. Nézzük meg mit jelentenek ezek: <link xlink:href="http://www.link.cs.cmu.edu/link/dict/section-S.html">http://www.link.cs.cmu.edu/link/dict/section-S.html</link></para>
+      <para>S connects subject-nouns to finite verbs: Ss and Sp: Noun-verb agreement</para>
+      <para>Tehát S összeköti az alanyi-főnevet és a ragozott igét, valamint jelen esetben Ss összeköti a főnevet és az igét.</para>
+      <para>Tripletünk alanya és állítmánya tehát ezen kapcsolat két szava. Már csak a tárgy hiányzik. Nézzük mit jelent a O*t:</para>
+      <para>O connects transitive verbs to direct or indirect objects.</para>
+      <para>Tehát az O kapcsolat és ennek a fajtái tárgyas igéket kötnek össze tágyakkal. Tehát Ha az előző S kapcsolatunk jobb oldala pont ennek az O kapcsolatnak a bal oldala, akkor nagy valószínűséggel ennek az O kapcsolatnak a jobb oldala lesz a tárgy a mondatban.</para>
+      <para>Megvan a triplet ebben az egszerű mondatban. Az igazán nehéz feladat azonban a bonyolult mondatokból való bányászat. Nézzük a következő kicsit nehezebb példát:</para>
+      <para>A mondat: A rare black squirrel has become a regular visitor to a suburban garden.</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="squirrel.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Mókus diagram</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>Ebben a példában már kicsivel több a kapcsolat a szavak között, de ez is az egyszerűbb példák közé tartozik. Próbáljuk meg az előző példa megoldási menete alapján keresni a tripletet: S kapcsolat bal és jobb oldala és az O kapcsolat jobb oldala. Squirrel has visitor Sajnos azonban ez nem a triplet amit a mondat tartalmaz, ugyanis a triplet: Squirrel become visitor.</para>
+      <para>A probléma hogy hogy a become szóhoz kapcsolódik egy előtag, a has. Ebben az esetben az állítmányunk nem az S kapcsolat jobb oldala lesz, hanem az S kapcsolat jobb oldalához kapcsolódó Pv*, Pg*, PP*, I*, TO, Mvi* címkék jobb oldali szava, valamint ha ezen jobb oldali szóhoz szintén kapcsolódik a fent említett címkék valamelyike akkor az azon címke jobb oldali szava lesz az állítmény és így tovább amíg el nem érünk egy olyan címke jobb oldali szavához amelyhez már nem kapcsolódik a fent említett címkék egyike sem (a * bármennyi további karaktert akár nullát jelent). Amint megtaláltuk az állítmányt: become, keressük az O* kapcsolatot amelynek bal oldali szava az állítmányunk és a jobb oldali szava lesz a tárgy. Nem is olyan nehéz ez. Még.</para>
+      <para>Jöjjön egy nehezebb példa: Mary Magdalene and the other Mary came to see the place where his body was.</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="Mary.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Mary diagram</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>Ebben aztán van minden.Itt mivel több alanyunk van, nem az S kapcsolatot keressük először hanem az SJ-s kapcsolatot névszerint: SJls és SJrs. Ugyanis szemmel láthatóan az SJls bal oldali szava lesz az egyik alany és ha ennek az SJls kapcsolatnak a jobb oldalán and kötőszó áll akkor annak az SJrs kapcsolatnak a bal oldali szava lesz a másik alany, amelyiknek a bal oldali szava az SJls kapcsolat jobb oldai and szava. Ennek a két alanynak a kötőszava egy S kapcsolat bal oldala kell legyen. Ennek az S kapcsolatnak a jobb oldalán keressük az állítmányt az eddigi módon. Mvi kapcsolat, I kapcsolat és végül megvan az állítmány ami a see. Ez a see egy O* kapcsolat bal oldala, aminek a jobb oldala lesz a tárgy, tehát a place. A triplet: Magdalene and Mary see place.</para>
+      <para>Természetesen a tökéletes megoldás az előtagokkal együtt érvényes, de ez szintén nem része az én megoldásomnak. A helyes triplet a következő lenne: Mary Magdalene and Mary came to see place. Figyeljük meg hogy további S kapcsolatokat tartalmaz a mondat: body was. Azonban ebben az esetben nincs tárgyunk az alany állítmány párhoz ezért ez nem egy teljes triplet.</para>
+      <para>Vannak olyan mondatok melyek több állítmányosak, több tárgyasak valamint bonyolultabbnál bonyolultabb módon tartalmazzák a tripleteket, ehhez tüzetesen át kell vizsgálni hogy a címkék milyen kapcsolatokat rejtenek.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <info>
+      <title>A megoldás</title>
+    </info>
+    <section>
+      <title>Hol találom?</title>
+      <para>A feladat tehát hogy minél jobb algoritmus szerint bányásszuk ki a helyes tripleteket a mondatokból. Nagyjából ez a háttere a feladatnak, így hát nézzük az én megoldásom:</para>
+      <para>A Samu projectben az NLP (Natural Language Parser) rész megtalálható az NLP.hpp fejállományban illetve az NLP.cpp forrásfájlban. Az a függvény amelyik a tripletbányászatot végzi az NLP.cpp-ben foglal helyet:</para>
+      <screen><![CDATA[SPOTriplets NLP::sentence2triplets ( const char* sentence )]]></screen>
+      <para>A függvény egy SPOTriplets Triplet típusú ataokat tartalmazó STL vectort ad eredményül, illetve egy const char * karaktertömböt kap argumentumként ami maga a mondat amiből a tripleteket kell kiszedni.</para>
+      <para>A link-grammar oldalán megtalálható egy példa program is ami nagyban segítette a munkámat: <link xlink:href="http://www.link.cs.cmu.edu/link/api/index.html#introduction">http://www.link.cs.cmu.edu/link/api/index.html#introduction</link></para>
+      <para>A következő sor a const char * és egy Dictionary típusból készít egy Sentence-t ami már olyan formátumban van ami “boncolható”.</para>
+      <screen><![CDATA[Sentence sent = sentence_create ( sentence, dict_ );]]></screen>
+      <para>A “boncolást” elősegítő tokenizálást pedig a következő sor adja:</para>
+      <screen><![CDATA[sentence_split ( sent, parse_opts_ );]]></screen>
+      <para>Ezek után a mondatban megkeressük az összes kapcsolatot:</para>
+      <screen><![CDATA[int num_linkages = sentence_parse ( sent, parse_opts_ );]]></screen>
+      <para>Sajnos a link-grammar hiányossága miatt nem minden mondatban képes kapcsolatokat találni ezért sok esetben egy teljesen értelmes, tripletet is tartalmazó mondattal nem tudunk mit kezdeni mert nem ismeri fel a kapcsolatokat a könyvtár.</para>
+      <para>Azonban ha találtunk kapcsolatot akkor kezdődhet a triplet bányászat. Kiszedjük az első kapcsolatot (a nulladikat) ami magában foglalja az összes további kapcsolatot, a továbbiakban ezzel a kapcsolattal fogunk dolgozni.</para>
+      <screen><![CDATA[Linkage linkage = linkage_create ( 0, sent, parse_opts_ );]]></screen>
+      <para>A következő cikk nagyban elősegítette a feladat megoldását: <link xlink:href="http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf">http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf</link></para>
+    </section>
+    <section>
+      <title>Az algoritmus</title>
+      <para>Az algoritmus a következő:</para>
+      <para>1: Meg kell határozni az S-kapcsolatot ( hogy melyik az )</para>
+      <para>2: Az alany ennek az S-kapcsolatnak a bal oldali szava</para>
+      <para>3: Az állítmány kezdetben az S kapcsolat jobb oldali szava</para>
+      <para>4: Ha az S-kapcsolat jobb oldali szava eleme egy Pv*, Pg*, PP*, I*, TO vagy Mvi* kapcsolatnak akkor az új állítmány annak a kapcsolatnak a jobb oldali szava lesz.</para>
+      <para>5: Ezt csináljuk mindaddig amíg a következő szó már nem eleme a fent említett kapcsolatok egyikének sem.</para>
+      <para>6: Ha az állítmányunk eleme egy O, Os*, Op* vagy Mvpn* kapcsolatnak akkor annak a kapcsolatnak a jobb oldala lesz a tárgy.</para>
+      <para>7: Ha nem eleme, akkor ha eleme egy Pa* vagy Mva* kapcsolatnak akkor annak a kapcsolatnak a jobb oldala lesz a tágy.</para>
+      <para>8: Ha az állítmányunk eleme egy Mvp*, Pp*, OF vagy TO kapcsolatnak, akkor egy elöljáró szót találunk ennek a kapcsolatnak a jobb oldalán.</para>
+      <para>9: Ha ez az elöljárószó eleme egy J*, TI, I* vagy ON kapcsolatnak akkor annak a kapcsolatnak a jobb oldala adja a tárgyat.</para>
+      <para>Ez az algoritmus csak a tripleteket adja és csak egyszerű esetben. Ez az algoritmus nem fedi le az összetett eseteket illetve a több alanyos/állítmányos/tárgyas mondatokat, de alapvetően megadja a triplet bányászatának módját.</para>
+    </section>
+    <section>
+      <title>Ahogy én csináltam</title>
+      <para>A saját kódom kód szintű kifejtésébe nem mennék bele, azonban az előbb leírt algoritmus kiterjesztését és ezáltal a kódom elvét megosztom:</para>
+      <para>Elsőször megnézem az összes címkét és ha találok benne SJls és SJrs címkéket, akkor biztosan több alanyos a mondat. Ebben az esetben az SJls bal oldali szava és az SJrs jobb oldali szava adja az alanyokat, majd az állítmányt a címkelista első Spx kapcsolat jobb oldali szava adja kezdetben. Ezt lehetne pontosítani úgy, hogy az azt az S-kapcsolatot keresem meg az első Spx helyett amelynek a bal oldala pontosan az SJls és SJrs kapcsolatok rendre jobb és bal oldalánál lévő and kötőszó.</para>
+      <para>Az állítmányt úgy határozom meg hogy kezdetben az állítmány a megfelelő S-kapcsolat jobb oldali szava, azonban ha a a címkelistából találok olyan címkét amely Pv*, Pg*, PP*, I*, TO vagy Mvi* kapcsolat címkéje és a kapcsolat bal oldala a jelenlegi állítmányom, akkor az új jelenlegi állítmány a fent említett címkével ellátott kapcsolat jobb oldali szava. Ezt folytatom mindaddig amíg találok újabb fent említett címkéket amelyek megfelelnek ennek a kritériumnak.</para>
+      <para>A tárgyat a következőképp keresem, ami egyébként ugyan az a több alanyos és az egy alanyos esetben is: Végignézem az összes címkét, és ha találok olyan címkét ami O, Os*, Op* vagy Mvpn* és amelynek egy olyan kapcsolatnak a címkéje amelynek a bal oldala pontosan az előbb talált állítmányom, akor a talált kapcsolat jobb oldala lesz a tárgy és megvan a triplet.</para>
+      <para>Ha nincs ilyen eset, akkor keresem az elöljárószavakat az előző minta alapján de itt a Mvp*, Pp*, OF, TO címkéket figyelem és ha megvan az elöljárószó, keresem azt a kapcsolatot amelynek a címkéje J*, TI, I* vagy ON és a bal oldali szava pontosan az elöljárószó. Ekkor a tárgy a talált kapcsolat jobb oldali szava.</para>
+      <para>Egy alanyos esetben csak az alany megtalálása:</para>
+      <para>Keresem azokat a címkéket amelyek Ss*, Sfut vagy Sp** elnevezésűek ( itt megjegyezném hogy ez is fejlesztésre szorul hiszen nem fedi le az összes esetet ) és annak a bal oldali szava lesz az alany és a jobb oldali szava lesz kezdetben az állítmány.</para>
+      <para>Mint azt korábban említettem, több állítmányos és több tárgyas eseteket nem fed le a megoldásom, ezért ezen esetekben a tripletek kibányászásának módja további feladat.</para>
+      <para>Szintén nem fedi le azt az esetet a megoldásom amikor több helyes tripletet is tartalmaz a mondat, viszont ezzel a megoldással lényegesen pontosabb és jelentős mennyiségű triplet bányászható ki.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Irodalom</title>
+    <section>
+      <title>Felhasznált segédletek</title>
+      <para><link xlink:href="http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf">http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf</link></para>
+      <para><link xlink:href="http://www.link.cs.cmu.edu/link/">http://www.link.cs.cmu.edu/link/</link></para>
+      <para><link xlink:href="http://www.link.cs.cmu.edu/link/ftp-site/link-grammar/LG-IWPT93.pdf">http://www.link.cs.cmu.edu/link/ftp-site/link-grammar/LG-IWPT93.pdf</link></para>
+    </section>
+    <section>
+      <title>A kódom</title>
+      <para><link xlink:href="https://github.com/AdamTakeow/amminadab/blob/master/nlp.cpp">https://github.com/AdamTakeow/amminadab/blob/master/nlp.cpp</link></para>
+    </section>
+  </chapter>
+</book>

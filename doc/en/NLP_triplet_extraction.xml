@@ -1,0 +1,148 @@
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude" version="5.1" xml:lang="en">
+  <info>
+  <title>Triplet Extraction in project Samu</title>
+    <author>
+      <personname>
+        <firstname>Ádám</firstname>
+        <surname>Bertalan</surname>
+      </personname>
+    </author>
+  </info>
+  <chapter>
+    <info>
+      <title>Introduction</title>
+    </info>
+    <section>
+      <title>Introduction</title>
+      <para>In this short article I will introduce the task that I solved for the third test of Prog2.</para>
+    </section>
+    <section>
+      <title>What is a triplet?</title>
+      <para>For beginning, what is a triplet? Look at the following sentence:</para>
+        <para>A rare black squirrel has become a regular visitor to a suburban garden.</para>
+        <para>From the view of sentence analysis, this sentence's predicate: become, subject: squirrel and object: visitor. In this case the sentence's triplet (subject-predicate-object triple): squirrel become visitor</para>
+    </section>
+    <section>
+      <title>The task</title>
+      <para>The objective is to extract as many triple as you can from a sentence. Naturally if one of the element (or more) from the triplet is missing, then we can't extract a triplet from it, altough it would be an interesting topic if we want to find the hidden subject of a sentence but my soulution does not deal with this (yet).</para>
+    </section>
+  </chapter>
+  <chapter>
+    <info>
+      <title>Let's begin</title>
+    </info>
+    <section>
+      <title>An example</title>
+      <para>Now we are know what is a triplet, the next step is to find out how to extract it from the sentence.</para>
+      <para>For the solution I used a library called link-grammar which is a great help to parse a sentence and make it easy to extract triplets. The link-grammar's documentation and more useful information can be found in the following link: <link xlink:href="http://www.link.cs.cmu.edu/link/">http://www.link.cs.cmu.edu/link/</link></para>
+      <para>The link-grammar library's most important function is that it can find the connection between the words of the sentence and it marks these connections with labels. The solution is much easier with these labels and the task is to find an algorithm which find the triplet's elements depending on the labels. Let's take a look at the following simple example for connections between words:</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="example_diagram.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Example diagram</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>After the parse we get a structure like this. This sentence's only triplet is car.is(mine) so let's find out the meaning of the labels. All labels meaning can be found in the following link: <link xlink:href="http://www.link.cs.cmu.edu/link/dict/index.html">http://www.link.cs.cmu.edu/link/dict/index.html</link> </para>
+      <para>The important labels for us are Ss and O*t. Look at their meaning: <link xlink:href="http://www.link.cs.cmu.edu/link/dict/section-S.html">http://www.link.cs.cmu.edu/link/dict/section-S.html</link></para>
+      <para>S connects subject-nouns to finite verbs: Ss and Sp: Noun-verb agreement</para>
+      <para>Our triplet's subject and predicate are the two word of this connection. Only the object is missing. Look at the O*t's meaning:</para>
+      <para>O connects transitive verbs to direct or indirect objects.</para>
+      <para>So if the previous connection's right word is exactly the O-connection'a left word then there is a big chance that the O-connection's right word will be the object in the sentence.</para>
+      <para>We just extracted the triplet from this simple sentence. But the challenge is to extract triplets from a complex sentence. Look at the following harder example:</para>
+      <para>The sentence: A rare black squirrel has become a regular visitor to a suburban garden.</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="squirrel.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Squirrel diagram</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>In this example there is a lot of connections, altough this sentence also an easy case comparatively to most of the sentences. Try to solve this depending on the solution of the previous sentence: The S-link's left word and the O-link's right word. The (wrong) solution: Squirrel has visitor. Unfortunatelly this is not the correct triplet because the correct triplet is: Squirrel become visitor.</para>
+      <para>The problem is that the word becoma has a prefix, the has word. In this case the predicate is not from the S-link's right word, but made from the link's right-word that has the label Pv*, Pg*, PP*, I*, TO, Mvi* and connected to the S-link's right-word and if this right-word also connected to a similar link then this continues until we find a right-word without a linkage that fits the criterion. The last right-word will be the predicate. The * character means any further character (even zero). When we find the predicate: become, we have to search for an O-link which left-word is exactly our predicate and that O-link's right-word will be the object. This is not so hard yet.</para>
+      <para>Here come a harder example: Mary Magdalene and the other Mary came to see the place where his body was.</para>
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="Mary.png"/>
+          </imageobject>
+          <textobject>
+            <phrase>Mary diagram</phrase>
+          </textobject>
+        </mediaobject>
+      </para>
+      <para>This has all the stuff. We have two subjects so we does not supposed to look for the S-link but we search for the SJ like linkage: SJls and SJrs. Namely we can see that the SJls's left-word will be a subject and the other subject will be the SJls's right-word if there is an and word between the two linkage. There must be an S-link which has the and word as it's left-word and that S-link's right-word will be the predicate at the beginning. To find the real predicate do what is written above. Mvi linkage, I linkage and finally we have the predicate: see. This word is a left-word of an O* linkage which right-word will be the object: place. The triplet: Magdalene and Mary see place.</para>
+      <para>Naturally the perfect solution is the words with their attributes but this also not part of my solution. The correct triplet would be: Mary Magdalene and Mary came to see place. Notice that there is another S-link in the sentence: body was. Nevertheless in this case there is no object for this linkage so this is not a full triplet.</para>
+      <para>There are sentences with more than one predicate, more than one object and contains the triplets in a very complex way so to write a good extraction algorithm a deeper look in the linkage documentation is necessary.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <info>
+      <title>The solution</title>
+    </info>
+    <section>
+      <title>Where to find?</title>
+      <para>The task is to write a better algorithm to extract correct triplets from the sentences. This is the main background of this task. Let's look at my solution:</para>
+      <para>In the project Samu the NLP (Natural Language Parser) part can be found in the NLP.hpp header file and in the NLP.cpp sourcefile. The function that performs the triplet extractin is in the NLP.cpp:</para>
+      <screen><![CDATA[SPOTriplets NLP::sentence2triplets ( const char* sentence )]]></screen>
+      <para>The function returns with an SPOTriplets type what is an STL vector witch contains Triplet types, and takes a const char * character array as an argument what is the sentence itself.</para>
+      <para>At the link-grammar's website there is an example program which helped me a lot: <link xlink:href="http://www.link.cs.cmu.edu/link/api/index.html#introduction">http://www.link.cs.cmu.edu/link/api/index.html#introduction</link></para>
+      <para>The following line creates a Sentence from a const char* and a Dictionar type. The Sentence is in a proper format which makes it "extractable".</para>
+      <screen><![CDATA[Sentence sent = sentence_create ( sentence, dict_ );]]></screen>
+      <para>The tokenization that helps extraction is given in the next line:</para>
+      <screen><![CDATA[sentence_split ( sent, parse_opts_ );]]></screen>
+      <para>After this we search for all the linkages in the sentence:</para>
+      <screen><![CDATA[int num_linkages = sentence_parse ( sent, parse_opts_ );]]></screen>
+      <para>Unfortunatelly the link-grammar's deficiency that it can't find any linkages in certain sentences, so in many case a real meaningful sentence cannot be parsed because of this deficiency.</para>
+      <para>Nevertheless if we find any linkage we can start the extraction. Extract the first linkage (the zero) which will contain all the further linkages, and we will work with this linkage.</para>
+      <screen><![CDATA[Linkage linkage = linkage_create ( 0, sent, parse_opts_ );]]></screen>
+      <para>The following article helped me the most: <link xlink:href="http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf">http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf</link></para>
+    </section>
+    <section>
+      <title>The algorithm</title>
+      <para>The algoritm is the following:</para>
+      <para>1: Determine the S-link ( which is the S-link ).</para>
+      <para>2: The subject will be the left-word of this linkage.</para>
+      <para>3: At the beginning the predicate will be the right-word of this linkage.</para>
+      <para>4: If the rigt-word of the S-link is an element of a Pv*, Pg*, PP*, I*, TO or Mvi* linkage then the new predicate will be that linkage's right-word.</para>
+      <para>5: Do this until the next word is not element any of the above.</para>
+      <para>6: If the found predicate is an element of an O, Os*, Op* or Mvpn* linkage then that linkage's right-word will be the object.</para>
+      <para>7: If there is no linkage that fit the criterion above, then if the predicate is an element of a Pa* or Mva* linkage then that linkage's right-word will be the the object.</para>
+      <para>8: If the predicate is an element of an Mvp*, Pp*, OF or TO linkage, then there is a preposition on the right side of that linkage.</para>
+      <para>9: If this preposition is an element of a J*, TI, I* or ON linkage then that linkage's right-word will be the object.</para>
+      <para>This algoritm just give the triplet elements but without their attributes, and only in simple cases. This algorithm does not cover all the cases like when there is more than one subject/predicate/object, but basically can extract triplets from sentences.</para>
+    </section>
+    <section>
+      <title>My solution</title>
+      <para>I do not want to explain deep my own code, but do want to share the previous algorithm expanded with double subject feature and so my code's background:</para>
+      <para>At first I look at all the labels (linkage label) and if I can find SJls and SJrs among them then sure it will be a two-subject sentence. In this case the SJls linkage's left-word and the SJrs's right-word will be the two subject and the predicate will be the fist Spx labelled linkage's right-word at the beginning. This could be more accurate if I would search for an Spx labelled linkage that has the word on its left side what the SJls has on the right side and what the SJrs has on the left side (this is usually the "and" conjunction).</para>
+      <para>The predicate is determined like this: at the beginning the predicate is the proper S-link's right-word but if there is a linkage with a label Pv*, Pg*, PP*, I*, TO or Mvi* and that linkage's left-word is the current predicate then the new predicate will be that linkage's right-word and continue this until there is no linkage with proper label that contains the current predicate.</para>
+      <para>To determine the object I use the same steps both multi-subject sentences and single-subject sentences: Look for all the labels and if I find a linkage with a label O, Os*, Op* or Mvpn* and which has the previously found predicate as its left-word then that linkage's right-word will be the object and we find a triplet.</para>
+      <para>If there is no linkage like that, then I search for a preposition as above but with labels: Mvp*, Pp*, OF, TO and if I found a preposition then I search for the linkage which has the label J*, TI, I* or ON and it has the preposition as its left-word. At this point the found linkage's right-word will be the object.</para>
+      <para>Finding the subject in a single-subject sentence:</para>
+      <para>I search for the linkages with Ss*, SFut or Sp** label ( I note here that this could be better because this does not cover all the cases ) and that linkage's left-word is the subject and the right-word is the predicate at the beginning.</para>
+      <para>As I mentioned before, cases with multiple predicate or object is not part of my solution, so triplet extraction in that cases is also a task waiting to solve.</para>
+      <para>That cases when the sentence has two or more full triplets also not part of my solution and still a task to solve, but my solution is significally accurate and a significant amount of triplets can be extracted with it.</para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Documentation</title>
+    <section>
+      <title>Used documents</title>
+      <para><link xlink:href="http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf">http://ailab.ijs.si/dunja/SiKDD2007/Papers/Rusu_Trippels.pdf</link></para>
+      <para><link xlink:href="http://www.link.cs.cmu.edu/link/">http://www.link.cs.cmu.edu/link/</link></para>
+      <para><link xlink:href="http://www.link.cs.cmu.edu/link/ftp-site/link-grammar/LG-IWPT93.pdf">http://www.link.cs.cmu.edu/link/ftp-site/link-grammar/LG-IWPT93.pdf</link></para>
+    </section>
+    <section>
+      <title>My sourcecode</title>
+      <para><link xlink:href="https://github.com/AdamTakeow/amminadab/blob/master/nlp.cpp">https://github.com/AdamTakeow/amminadab/blob/master/nlp.cpp</link></para>
+    </section>
+  </chapter>
+</book>
