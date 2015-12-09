@@ -82,18 +82,19 @@
           size_t pos = 0;
           for(int i=0; i<text.length(); i++){
                 if(text[i]=='\n' || text[i]=='.' || text[i]=='?' || text[i]=='!'){
-                  if(i == 0 || text[0] == ' ' || text[0] == '\t')
+                  if(i == 0 || text[0] == ' ' || text[0] == '\t' || text[0] == '\n')
                   {
                     i = -1;
                     text.erase(0,1);
                   }
                   else
                   {
+		    text.erase(i,1);
                         internet_sentences.push_back(text.substr(0, i));
                         internet_sentences[internet_sentences.size()-1].append("\n");
                         text.erase(0,i);
                         i=0;
-                        while(text[i]=='\n' || text[i]=='.' || text[i]=='?' || text[i]=='!' || text[i]==' ')
+                        while(text[i]=='\n' || text[i]=='.' || text[i]=='?' || text[i]=='!' || text[i]==' ' || text[0] == '\t')
                         {
                           text.erase(0,1);
                         }
@@ -111,24 +112,25 @@
           size_t pos2 = 0;
           size_t pos3 = 0;
           std::string newurl;
-          std::string temp = newurl;
-          std::vector<std::string> links;
+	  std::vector<std::string> links;
+	  while((pos = text.find("&amp;")) != std::string::npos)
+	  {
+	    text.erase(pos+1, 4);
+	  }
+	  
           while ((pos = text.find('<')) != std::string::npos)
           {
             if((pos3 = text.find("<a href=\"http")) != std::string::npos)
 	    {
 	      pos3 += 9;
-              for(unsigned i = pos3; i < text.length(); i++)
+	      for(unsigned i = pos3; i < text.length(); i++)
               {
                 if(text[i] == '\"')
                 {
                   newurl = text.substr(pos3, i-pos3);
 		  text.erase(pos3,i + 1 - pos3);
-                  if(newurl != temp)
-                  {
-                    disp.log(newurl);
-                    links.push_back(newurl);
-                  }
+                  disp.log(newurl);
+                  links.push_back(newurl);
                   break;
                 }
               }
@@ -156,35 +158,45 @@
                 splitText(str);
           }
           
-          bool linkDone = false;
-          for(auto link : links)
+          //bool linkDone = false;
+          while(internet_row < internet_sentences.size())
+		      {
+			if(internet_sentences[internet_row] != "\n")
+			{
+			  //std::cerr << linksDone[linksDone.size()-1] << "KOPASZ " << internet_sentences[internet_row] << std::endl;
+			  sentence( -1, internet_sentences[internet_row] );
+			  internet_row++;
+			}
+		      }
+		      internet_sentences.clear();
+		      internet_row = 0;
+	  if(links.size() > 0)
 	  {
-            //auto it = std::find_if(links.begin(), links.end(), [this,link](std::string n){return n==link;});
-            //if(it == links.end())
-	    //{
-	    linkDone = false;
-	    for(auto doneLink : linksDone)
+	    int JOHNCENA = links.size()-1;
+	    /*for(auto link : links)
 	    {
-	      if(link == doneLink)
+	      linkDone = false;
+	      for(auto doneLink : linksDone)
 	      {
-		linkDone = true;
-		break;
+		if(link == doneLink)
+		{
+		  linkDone = true;
+		  break;
+		}
 	      }
-	    }
-	    if(!linkDone)
-	    {
-		    linksDone.push_back(link);
-                    parseURL(link);
-	    }      
-	    //}
-          }
-
+	      if(!linkDone)
+	      {*/
+		      
+		      
+		      //linksDone.push_back(link);
+		      parseURL(links[JOHNCENA]);
+	    links.clear();
+	  }
         }
          
         void Samu::parseURL ( std::string url )
         {
           disp.log(url);
-         
           CURL *curl;
           CURLcode res;
           std::string readBuffer;
